@@ -1,0 +1,28 @@
+# Node
+node_modules/
+npm-debug.log
+
+
+# Playwright artifacts
+/test-results/
+/playwright-report/
+/videos/
+/screenshots/
+/trace/
+/.playwright/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+
+# Local env / config
+.env
+.env.Local
+.vscode/
+.DS_Store
+
+
+# Typescript
+dist/
+build/
+*.tsbuildinfo
