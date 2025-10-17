@@ -15,9 +15,15 @@ npm-debug.log
 /playwright/.auth/
 
 
-# Local env / config
+# Applitools Sample
+/eyes-examples/
+
+
+# Environment / Secrets
 .env
-.env.Local
+
+
+# Config
 .vscode/
 .DS_Store
 

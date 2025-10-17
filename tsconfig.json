@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "strict": true,
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
+    "strict": true,
+    "allowJs": true,
+    "types": ["@playwright/test", "@types/node"],
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "types": ["@playwright/test", "node"],
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
