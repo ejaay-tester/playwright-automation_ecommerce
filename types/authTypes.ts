@@ -13,6 +13,8 @@ export type UserCredentials = {
 
 // Type definition for metadata of user login
 export type UserLoginMeta = {
+  id: number
+  title: string
   loginKey: LoginKey
   loginErrorMessage: string
 }
