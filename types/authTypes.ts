@@ -1,32 +1,26 @@
-// Type definition for valid & invalid user logins (combined)
-export type AuthUser = {
-  validUserLogin: UserCredentials
-  invalidUserLogin: Record<InvalidLoginKeys, UserCredentials>
-}
+// Single container for all login cases
+export type AuthUser = Record<LoginKey, UserCredentials>
 
-// Type definition for login credentials + metadata
+// Basic user credentials
 export type UserCredentials = {
   email: string
   password: string
   meta: UserLoginMeta
 }
 
-// Type definition for metadata of user login
+// Common metadata for any login test case
 export type UserLoginMeta = {
   id: number
   title: string
-  loginKey: LoginKey
-  loginErrorMessage: string
+  errorMessage?: string
 }
 
-// Type definition for login key
-export type LoginKey = ValidLoginKeys | InvalidLoginKeys
-
-// Type definition for valid login key
-export type ValidLoginKeys = "validUserLogin"
-
-// Type definition for invalid login key
-type InvalidLoginKeys =
+// Enumerate login keys
+export type LoginKey =
+  | "validUserLogin"
   | "invalidEmail"
   | "invalidPassword"
   | "invalidEmailAndPassword"
+
+// Type representing a single test case (with key + credentials)
+export type LoginTestCase = UserCredentials & { loginKey: LoginKey }
