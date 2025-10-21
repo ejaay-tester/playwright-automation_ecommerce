@@ -1,25 +1,35 @@
-import { test, expect } from "@playwright/test"
+import { test, expect } from "../../../fixtures/authFixture"
+import { validLoginData } from "data/auth/validLoginData"
+import { invalidLoginTests } from "../../../data/auth/invalidLoginTests"
 
-test.describe("Login Features Test | Valid Login Credentials @smoke", () => {
-  test("JIRA-101: Login with valid user credentials", async ({ page }) => {
-    await page.goto("https://practicesoftwaretesting.com/", {
-      waitUntil: "networkidle",
-    })
-
-    // Verify if the Sign In link is visible
-    await expect(page.getByText("Sign in")).toBeVisible()
-    await page.getByText("Sign in").click()
-
-    // Verify the Login page
-    const h3Locator = page.locator("h3")
-    await expect(h3Locator).toHaveText("Login")
-
-    // Fill login credentials and submit
-    await page.locator("#email").fill("test@yopmail.com")
-    await page.locator("#password").fill("Ak0@ytester")
-    await page.getByRole("button", { name: "Login" }).click()
-
-    // Assert successful login
-    await expect(page).toHaveURL("https://practicesoftwaretesting.com/account")
+test.describe("Login Feature Test | Valid Login Credentials @regression @smoke", () => {
+  const { id, title } = validLoginData.meta
+  test(`JIRA-${id}: ${title}`, async ({ loginPage, validUser }) => {
+    const { email, password } = validUser
+    await loginPage.userLogin(email, password)
+    await loginPage.expectOnUserDashboard()
   })
+})
+
+// Negative Login Tests (loop-driver)
+test.describe("Login Feature Test | Invalid Login Credentials @regression @smoke", () => {
+  for (const { email, password, meta } of invalidLoginTests) {
+    test(`JIRA-${meta.id}: ${meta.title}`, async ({ loginPage }) => {
+      // Perform login
+      await loginPage.userLogin(email, password)
+
+      // Wait for error alert to appear if applicable
+      if (meta.emailError) {
+        await loginPage.expectEmailError(meta.emailError)
+      }
+
+      if (meta.passwordError) {
+        await loginPage.expectPasswordError(meta.passwordError)
+      }
+
+      if (meta.loginError) {
+        await loginPage.expectLoginError(meta.loginError)
+      }
+    })
+  }
 })
