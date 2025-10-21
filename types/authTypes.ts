@@ -1,5 +1,9 @@
-// Single container for all login cases
-export type AuthUser = Record<LoginKey, UserCredentials>
+// Enumerate login keys
+export type LoginKey =
+  | "validUserLogin"
+  | "invalidEmail"
+  | "invalidPassword"
+  | "invalidEmailAndPassword"
 
 // Basic user credentials
 export type UserCredentials = {
@@ -15,12 +19,8 @@ export type UserLoginMeta = {
   errorMessage?: string
 }
 
-// Enumerate login keys
-export type LoginKey =
-  | "validUserLogin"
-  | "invalidEmail"
-  | "invalidPassword"
-  | "invalidEmailAndPassword"
+// Single container for all login cases
+export type AuthUser = Record<LoginKey, UserCredentials>
 
 // Type representing a single test case (with key + credentials)
 export type LoginTestCase = UserCredentials & { loginKey: LoginKey }

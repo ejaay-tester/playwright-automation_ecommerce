@@ -1,11 +1,16 @@
-import { AuthUser, LoginKey, LoginTestCase } from "../types/authTypes"
+// This file keeps only the raw dataset
+
+import { AuthUser } from "../../types/authTypes"
 
 export const userLoginData: Readonly<AuthUser> = {
+  // Login credentials with valid email and password
   validUserLogin: {
     email: "test@yopmail.com",
     password: "Ak0@ytester",
     meta: { id: 101, title: "Login with valid user credentials" },
   },
+
+  // Login credentials with invalid email but valid password
   invalidEmail: {
     email: "test",
     password: "Ak0@ytester",
@@ -15,6 +20,8 @@ export const userLoginData: Readonly<AuthUser> = {
       errorMessage: "Your email is invalid",
     },
   },
+
+  // Login credentials with valid email but invalid password
   invalidPassword: {
     email: "test@yopmail.com",
     password: "password",
@@ -24,6 +31,8 @@ export const userLoginData: Readonly<AuthUser> = {
       errorMessage: "Your password is invalid",
     },
   },
+
+  // Login credentials with invalid email and password
   invalidEmailAndPassword: {
     email: "test",
     password: "password",
@@ -34,10 +43,3 @@ export const userLoginData: Readonly<AuthUser> = {
     },
   },
 }
-
-export const invalidLoginTests: LoginTestCase[] = Object.entries(userLoginData)
-  .filter(([loginKey]) => loginKey !== "validUserLogin") // exclude the valid user login
-  .map(([loginKey, userCredentials]) => ({
-    loginKey: loginKey as Exclude<LoginKey, "validUserLogin">,
-    ...userCredentials,
-  }))
