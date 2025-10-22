@@ -9,16 +9,20 @@ export class LoginPage {
   private readonly emailInput: Locator
   private readonly passwordInput: Locator
   private readonly loginButton: Locator
-  private readonly errorMessage: Locator
+  private readonly emailError: Locator
+  private readonly passwordError: Locator
+  private readonly loginError: Locator
 
   constructor(page: Page) {
     this.page = page
-    this.signInNavLink = page.locator("Sign in")
+    this.signInNavLink = page.getByRole("link", { name: "Sign in" })
     this.loginPageHeading = page.locator("h3")
     this.emailInput = page.locator("#email")
     this.passwordInput = page.locator("#password")
-    this.loginButton = page.locator("button[type='submit']")
-    this.errorMessage = page.locator(".help-block")
+    this.loginButton = page.getByRole("button", { name: "Login" })
+    this.emailError = page.locator("#email-error")
+    this.passwordError = page.locator("#password-error")
+    this.loginError = page.locator('[data-test="login-error"]')
   }
 
   // ==========
@@ -35,7 +39,8 @@ export class LoginPage {
 
       // Landing page
       await this.page.goto("https://practicesoftwaretesting.com/", {
-        waitUntil: "networkidle",
+        waitUntil: "domcontentloaded",
+        timeout: 60000,
       })
 
       // Redirected to the login page
@@ -46,15 +51,17 @@ export class LoginPage {
   // Navigate to the user dashboard without logging in
   async gotoUserDashboardDirectly() {
     await test.step("Navigate to user dashboard without logging in", async () => {
-      await this.page.goto("https://practicesoftwaretesting.com/account")
+      await this.page.goto("https://practicesoftwaretesting.com/account", {
+        waitUntil: "domcontentloaded",
+      })
     })
   }
 
   // Perform login with given user credentials
-  async userLogin() {
+  async userLogin(email: string, password: string) {
     await test.step("Fill the email and password input, then click the Login button", async () => {
-      await this.emailInput.fill("test@yopmail.com")
-      await this.passwordInput.fill("Ak0@ytester")
+      await this.emailInput.fill(email)
+      await this.passwordInput.fill(password)
       await this.loginButton.click()
     })
   }
@@ -66,6 +73,7 @@ export class LoginPage {
   // Verify that the landing page is displayed
   async expectOnLoginPage() {
     await test.step("Verify user is on login page", async () => {
+      await this.loginPageHeading.waitFor({ state: "visible", timeout: 10000 })
       await expect(this.loginPageHeading).toHaveText("Login")
     })
   }
@@ -74,6 +82,30 @@ export class LoginPage {
   async expectOnUserDashboard() {
     await test.step("Verify user is on the user dashboard ", async () => {
       await expect(this.page).toHaveURL(/.*account/) // Regex to match URL containing 'account'
+    })
+  }
+
+  // Verify email error message
+  async expectEmailError(emailErrorMessage: string) {
+    await test.step(`Verify error message contains: "${emailErrorMessage}"`, async () => {
+      await expect(this.emailError).toBeVisible()
+      await expect(this.emailError).toContainText(emailErrorMessage)
+    })
+  }
+
+  // Verify password error message
+  async expectPasswordError(passwordErrorMessage: string) {
+    await test.step(`Verify error message contains: "${passwordErrorMessage}"`, async () => {
+      await expect(this.passwordError).toBeVisible()
+      await expect(this.passwordError).toContainText(passwordErrorMessage)
+    })
+  }
+
+  // Verify email error message
+  async expectLoginError(loginErrorMessage: string) {
+    await test.step(`Verify error message contains: "${loginErrorMessage}"`, async () => {
+      await expect(this.loginError).toBeVisible()
+      await expect(this.loginError).toContainText(loginErrorMessage)
     })
   }
 }
