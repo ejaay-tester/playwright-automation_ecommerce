@@ -22,9 +22,7 @@ export class LoginPage {
     this.loginButton = page.getByRole("button", { name: "Login" })
     this.emailError = page.locator("#email-error")
     this.passwordError = page.locator("#password-error")
-    this.loginError = page.getByText("Invalid email or password", {
-      exact: true,
-    })
+    this.loginError = page.locator('[data-test="login-error"]')
   }
 
   // ==========

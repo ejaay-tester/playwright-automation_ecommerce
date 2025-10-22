@@ -1,6 +1,6 @@
 import { test, expect } from "../../../fixtures/authFixture"
+import { invalidLoginData } from "data/auth/invalidLoginData"
 import { validLoginData } from "data/auth/validLoginData"
-import { invalidLoginTests } from "../../../data/auth/invalidLoginTests"
 
 test.describe("Login Feature Test | Valid Login Credentials @regression @smoke", () => {
   const { id, title } = validLoginData.meta
@@ -13,7 +13,7 @@ test.describe("Login Feature Test | Valid Login Credentials @regression @smoke",
 
 // Negative Login Tests (loop-driver)
 test.describe("Login Feature Test | Invalid Login Credentials @regression @smoke", () => {
-  for (const { email, password, meta } of invalidLoginTests) {
+  for (const { email, password, meta } of invalidLoginData) {
     test(`JIRA-${meta.id}: ${meta.title}`, async ({ loginPage }) => {
       // Perform login
       await loginPage.userLogin(email, password)
