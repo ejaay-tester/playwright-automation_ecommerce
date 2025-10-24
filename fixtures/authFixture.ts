@@ -1,8 +1,8 @@
 import { test as base, Page } from "@playwright/test"
 import { LoginPage } from "../pages/LoginPage"
 import { UserCredentials } from "../types/authTypes"
-import { validLoginData } from "../data/auth/validLoginData"
-import { invalidLoginTests } from "../data/auth/invalidLogins/invalidLoginTests"
+import validLoginData from "data/auth/validLoginData"
+import invalidLoginTests from "data/auth/invalidLoginTests"
 
 type AuthFixtures = {
   startOnLoginPage: boolean

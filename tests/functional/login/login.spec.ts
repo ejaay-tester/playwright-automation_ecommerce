@@ -1,6 +1,6 @@
 import { test } from "../../../fixtures/authFixture"
-import { validLoginData } from "data/auth/validLoginData"
-import { invalidLoginTests } from "data/auth/invalidLogins/invalidLoginTests"
+import validLoginData from "data/auth/validLoginData"
+import invalidLoginTests from "data/auth/invalidLoginTests"
 
 test.describe("Login Feature Test | Valid Login Credentials @regression @smoke", () => {
   const { id, title } = validLoginData.meta

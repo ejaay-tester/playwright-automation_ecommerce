@@ -1,6 +1,6 @@
 import { LoginTestCase } from "../../../types/authTypes"
 
-export const missingFieldsData: Readonly<LoginTestCase[]> = [
+const missingFieldsData: Readonly<LoginTestCase[]> = [
   // Missing email and password on login
   {
     email: "",
@@ -35,3 +35,5 @@ export const missingFieldsData: Readonly<LoginTestCase[]> = [
     },
   },
 ]
+
+export default missingFieldsData

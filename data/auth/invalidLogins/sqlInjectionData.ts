@@ -3,7 +3,7 @@ import { LoginTestCase } from "../../../types/authTypes"
 // Goal: Ensure the system doesn't crash, leaks data, or bypass auth when SQL payloads are entered.
 // Expected: Application safely rejects input (generic error message, no crash, no leakage).
 
-export const sqlInjectionData: Readonly<LoginTestCase[]> = [
+const sqlInjectionData: Readonly<LoginTestCase[]> = [
   // Login credentials using SQL injection payload
   {
     email: "' OR '1'='1",
@@ -37,3 +37,5 @@ export const sqlInjectionData: Readonly<LoginTestCase[]> = [
     },
   },
 ]
+
+export default sqlInjectionData

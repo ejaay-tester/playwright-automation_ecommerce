@@ -2,7 +2,7 @@
 
 import { UserCredentials } from "../../types/authTypes"
 
-export const validLoginData: Readonly<UserCredentials> = {
+const validLoginData: Readonly<UserCredentials> = {
   email: "test@yopmail.com",
   password: "Ak0@ytester",
   meta: {
@@ -10,3 +10,5 @@ export const validLoginData: Readonly<UserCredentials> = {
     title: "Login with valid user credentials",
   },
 }
+
+export default validLoginData

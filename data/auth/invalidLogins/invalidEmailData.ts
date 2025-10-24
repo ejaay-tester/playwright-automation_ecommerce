@@ -1,6 +1,6 @@
 import { LoginTestCase } from "../../../types/authTypes"
 
-export const invalidEmailData: Readonly<LoginTestCase[]> = [
+const invalidEmailData: Readonly<LoginTestCase[]> = [
   // Login credentials with invalid email
   {
     email: "test",
@@ -34,3 +34,5 @@ export const invalidEmailData: Readonly<LoginTestCase[]> = [
     },
   },
 ]
+
+export default invalidEmailData

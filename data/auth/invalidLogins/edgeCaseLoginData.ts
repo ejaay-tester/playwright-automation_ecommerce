@@ -2,7 +2,7 @@ import { LoginTestCase } from "../../../types/authTypes"
 
 // Goal: Check how the app handles weird but valid inputs (whitespace, casing, unicode, etc.).
 // Expected: App should trims and validates properly - or shows a clear error without crashing
-export const edgeCaseLoginData: Readonly<LoginTestCase[]> = [
+const edgeCaseLoginData: Readonly<LoginTestCase[]> = [
   // Login credentials with extra spaces in email and password
   {
     email: " test@yopmail.com ",
@@ -21,7 +21,7 @@ export const edgeCaseLoginData: Readonly<LoginTestCase[]> = [
     meta: {
       id: 115,
       title: "Login with uppercase email",
-      loginError: "Invalid email or password",
+      // loginError: "Invalid email or password",
     },
   },
 
@@ -54,7 +54,10 @@ export const edgeCaseLoginData: Readonly<LoginTestCase[]> = [
     meta: {
       id: 118,
       title: "Login with locked account",
-      loginError: "Account locked! Please contact the system administrator.",
+      loginError:
+        "Account locked, too many failed attempts. Please contact the administrator.",
     },
   },
 ]
+
+export default edgeCaseLoginData

@@ -1,6 +1,6 @@
 import { LoginTestCase } from "../../../types/authTypes"
 
-export const invalidPasswordData: Readonly<LoginTestCase[]> = [
+const invalidPasswordData: Readonly<LoginTestCase[]> = [
   // Login credentials with invalid password
   {
     email: "test@yopmail.com",
@@ -12,3 +12,5 @@ export const invalidPasswordData: Readonly<LoginTestCase[]> = [
     },
   },
 ]
+
+export default invalidPasswordData

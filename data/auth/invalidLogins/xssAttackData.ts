@@ -3,7 +3,7 @@ import { LoginTestCase } from "../../../types/authTypes"
 // Goal: Prevent malicious script injection in login forms or error messages.
 // Expected: System treats input as plain text; no JavaScript execution occurs
 
-export const xssAttackData: Readonly<LoginTestCase[]> = [
+const xssAttackData: Readonly<LoginTestCase[]> = [
   // Login credentials using script tag in email field
   {
     email: `<script>alert('XSS')</script>`,
@@ -26,3 +26,5 @@ export const xssAttackData: Readonly<LoginTestCase[]> = [
     },
   },
 ]
+
+export default xssAttackData
