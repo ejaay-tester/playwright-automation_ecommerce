@@ -21,7 +21,7 @@ const edgeCaseLoginData: Readonly<LoginTestCase[]> = [
     meta: {
       id: 115,
       title: "Login with uppercase email",
-      // loginError: "Invalid email or password",
+      loginError: "Invalid email or password",
     },
   },
 

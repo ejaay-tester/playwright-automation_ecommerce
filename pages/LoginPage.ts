@@ -1,6 +1,6 @@
 import { test, expect, Page, Locator } from "@playwright/test"
 
-export class LoginPage {
+class LoginPage {
   // Page object reference
   private readonly page: Page
   // Login page locators (hidden from tests, immutable or not changeable)
@@ -109,3 +109,5 @@ export class LoginPage {
     })
   }
 }
+
+export default LoginPage
