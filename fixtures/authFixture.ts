@@ -2,7 +2,7 @@ import { test as base, Page } from "@playwright/test"
 import { LoginPage } from "../pages/LoginPage"
 import { UserCredentials } from "../types/authTypes"
 import { validLoginData } from "../data/auth/validLoginData"
-import { invalidLoginData } from "../data/auth/invalidLoginData"
+import { invalidLoginTests } from "../data/auth/invalidLogins/invalidLoginTests"
 
 type AuthFixtures = {
   startOnLoginPage: boolean
@@ -28,7 +28,7 @@ export const test = base.extend<AuthFixtures>({
   },
 
   invalidUsers: async ({}, use) => {
-    await use(invalidLoginData)
+    await use(invalidLoginTests)
   },
 })
 

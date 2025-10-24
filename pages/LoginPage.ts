@@ -101,7 +101,7 @@ export class LoginPage {
     })
   }
 
-  // Verify email error message
+  // Verify login error message
   async expectLoginError(loginErrorMessage: string) {
     await test.step(`Verify error message contains: "${loginErrorMessage}"`, async () => {
       await expect(this.loginError).toBeVisible()
