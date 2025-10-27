@@ -1,6 +1,6 @@
 import { test, expect, Page, Locator } from "@playwright/test"
 
-export class LoginPage {
+class LoginPage {
   // Page object reference
   private readonly page: Page
   // Login page locators (hidden from tests, immutable or not changeable)
@@ -101,7 +101,7 @@ export class LoginPage {
     })
   }
 
-  // Verify email error message
+  // Verify login error message
   async expectLoginError(loginErrorMessage: string) {
     await test.step(`Verify error message contains: "${loginErrorMessage}"`, async () => {
       await expect(this.loginError).toBeVisible()
@@ -109,3 +109,5 @@ export class LoginPage {
     })
   }
 }
+
+export default LoginPage
