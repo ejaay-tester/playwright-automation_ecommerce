@@ -1,4 +1,6 @@
 import { test, expect, Page, Locator } from "@playwright/test"
+import { TEST_CONFIG } from "../config/testConfig"
+import { log } from "../utils/logger"
 
 class ProductPage {
   private readonly page: Page
@@ -23,13 +25,15 @@ class ProductPage {
   async navigateToProductListing() {
     await test.step("Navigate to Product Listing Page", async () => {
       // Products page
-      await this.page.goto("https://practicesoftwaretesting.com/", {
+      await this.page.goto(TEST_CONFIG.baseURL, {
         waitUntil: "domcontentloaded", // Loads faster, less prone to hang
-        timeout: 45000, // Optional: increase to 45s for reliability
+        timeout: TEST_CONFIG.timeouts.long,
       })
 
       // Wait for products to render
-      await expect(this.productCards.first()).toBeVisible({ timeout: 10000 })
+      await expect(this.productCards.first()).toBeVisible({
+        timeout: TEST_CONFIG.timeouts.medium,
+      })
     })
   }
 
@@ -45,30 +49,23 @@ class ProductPage {
       })
 
       // For debugging purposes only...
-      //   if (process.env.DEBUG === "true") {
-      //     const totalMatchedProducts = await productCard.count()
-      //     console.log(
-      //       `Found ${totalMatchedProducts} product/s for "${productName}".`
-      //     )
-      //     for (let i = 0; i < totalMatchedProducts; i++) {
-      //       console.log(await productCard.nth(i).innerText())
-      //     }
-      //   }
-
-      // For debugging purposes only
       const totalMatchedProducts = await productCard.count()
-      console.log(
-        `[DEBUG] ${totalMatchedProducts} product(s) matched: ${productName}`
-      )
+      log(`Found ${totalMatchedProducts} product(s) matching "${productName}"`)
+      if (TEST_CONFIG.debug) {
+        for (let i = 0; i < totalMatchedProducts; i++) {
+          log(await productCard.nth(i).innerText())
+        }
+      }
 
-      //
       await productCard.scrollIntoViewIfNeeded()
-      await expect(productCard).toBeVisible({ timeout: 10000 })
+      await expect(productCard).toBeVisible({
+        timeout: TEST_CONFIG.timeouts.medium,
+      })
       await productCard.click()
-
-      // Wait for product details page to load
-      await this.page.waitForLoadState("networkidle")
-      await expect(this.addToCartButton).toBeVisible({ timeout: 10000 })
+      await this.page.waitForLoadState("networkidle") // Wait for product details page to load
+      await expect(this.addToCartButton).toBeVisible({
+        timeout: TEST_CONFIG.timeouts.medium,
+      })
     })
   }
 
@@ -76,7 +73,9 @@ class ProductPage {
   async addProductToCart() {
     await test.step("Add the selected product to the cart", async () => {
       await this.addToCartButton.scrollIntoViewIfNeeded()
-      await expect(this.addToCartButton).toBeVisible({ timeout: 5000 })
+      await expect(this.addToCartButton).toBeVisible({
+        timeout: TEST_CONFIG.timeouts.short,
+      })
       await this.addToCartButton.click()
     })
   }
@@ -85,7 +84,9 @@ class ProductPage {
   async addProductToFavorites() {
     await test.step("Add the selected product to favourites", async () => {
       await this.addToFavouritesButton.scrollIntoViewIfNeeded()
-      await expect(this.addToFavouritesButton).toBeVisible({ timeout: 5000 })
+      await expect(this.addToFavouritesButton).toBeVisible({
+        timeout: TEST_CONFIG.timeouts.short,
+      })
       await this.addToFavouritesButton.click()
     })
   }
@@ -97,7 +98,9 @@ class ProductPage {
   // Assert toast notification after adding the product in the cart
   async expectToastMessage(expectedText: string) {
     await test.step(`Verify toast message contains: ${expectedText}`, async () => {
-      await expect(this.toastNotification).toBeVisible({ timeout: 7000 })
+      await expect(this.toastNotification).toBeVisible({
+        timeout: TEST_CONFIG.timeouts.short,
+      })
       await expect(this.toastNotification).toContainText(expectedText)
     })
   }
