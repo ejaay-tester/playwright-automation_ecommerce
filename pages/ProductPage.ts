@@ -1,6 +1,7 @@
 import { test, expect, Page, Locator } from "@playwright/test"
 import { TEST_CONFIG } from "../config/testConfig"
 import { log } from "../utils/logger"
+import { getProductCardByName } from "../utils/helpers/elementHelper"
 
 class ProductPage {
   private readonly page: Page
@@ -55,11 +56,13 @@ class ProductPage {
       //   })
       // OR
 
-      const productCard = this.productCards.filter({
-        has: this.productName.filter({
-          hasText: new RegExp(`^\\s*${productName}\\s*$`, "i"),
-        }),
-      })
+      //   const productCard = this.productCards.filter({
+      //     has: this.productName.filter({
+      //       hasText: new RegExp(`^\\s*${productName}\\s*$`, "i"),
+      //     }),
+      //   })
+
+      const productCard = getProductCardByName(this.page, productName)
 
       // For debugging purposes only...
       const totalMatchedProduct = await productCard.count()
