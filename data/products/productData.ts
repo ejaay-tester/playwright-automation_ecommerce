@@ -1,3 +1,5 @@
+// Base product info (reusable everywhere)
+
 import { Products } from "../../types/productTypes"
 
 const products: Readonly<Products> = {
@@ -14,6 +16,13 @@ const products: Readonly<Products> = {
     description: "This is the description for the thor hammer",
     price: "$11.14",
     category: ["Hammer", "ForgeFlex Tools"],
+  },
+  pliers: {
+    id: "01K8WMG3YWQD6T8ABW3YNMMV9M",
+    name: "Pliers",
+    description: "This is the description for the pliers",
+    price: "$12.01",
+    category: ["Pliers", "ForgeFlex Tools"],
   },
 }
 

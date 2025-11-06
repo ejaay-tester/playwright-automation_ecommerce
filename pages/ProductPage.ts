@@ -5,6 +5,7 @@ import { log } from "../utils/logger"
 class ProductPage {
   private readonly page: Page
   private readonly productCards: Locator
+  private readonly productName: Locator
   private readonly addToCartButton: Locator
   private readonly addToFavouritesButton: Locator
   private readonly toastNotification: Locator
@@ -12,7 +13,8 @@ class ProductPage {
   constructor(page: Page) {
     this.page = page
     this.productCards = page.locator('a[data-test^="product-"]')
-    this.addToCartButton = page.getByRole("button", { name: "Add to cart" })
+    this.productName = page.locator('h5[data-test="product-name"]')
+    this.addToCartButton = page.getByRole("button", { name: /add to cart/i })
     this.addToFavouritesButton = page.locator("#btn-add-to-favorites")
     this.toastNotification = page.locator("#toast-container")
   }
@@ -30,10 +32,11 @@ class ProductPage {
         timeout: TEST_CONFIG.timeouts.long,
       })
 
-      // Wait for products to render
+      // Ensure at least one product card is visible
       await expect(this.productCards.first()).toBeVisible({
         timeout: TEST_CONFIG.timeouts.medium,
       })
+      log("Product listing page loaded successfully")
     })
   }
 
@@ -44,28 +47,45 @@ class ProductPage {
   // Select specific product from the product listing page
   async selectProductByName(productName: string) {
     await test.step(`Select product "${productName}" from product listing`, async () => {
+      // Target the product card containing <h5 data-test="product-name">
+      //   const productCard = this.page.locator('a[data-test^="product-"]', {
+      //     has: this.page.locator('h5[data-test="product-name"]', {
+      //       hasText: new RegExp(`^\\s*${productName}\\s*$`, "i"),
+      //     }),
+      //   })
+      // OR
+
       const productCard = this.productCards.filter({
-        hasText: new RegExp(`\\b${productName}\\b`, "i"),
+        has: this.productName.filter({
+          hasText: new RegExp(`^\\s*${productName}\\s*$`, "i"),
+        }),
       })
 
       // For debugging purposes only...
-      const totalMatchedProducts = await productCard.count()
-      log(`Found ${totalMatchedProducts} product(s) matching "${productName}"`)
-      if (TEST_CONFIG.debug) {
-        for (let i = 0; i < totalMatchedProducts; i++) {
-          log(await productCard.nth(i).innerText())
-        }
+      const totalMatchedProduct = await productCard.count()
+      log(`Found ${totalMatchedProduct} product(s) matching "${productName}"`)
+
+      if (totalMatchedProduct === 0) {
+        throw new Error(`No product found with name: "${productName}"`)
+      }
+      if (totalMatchedProduct > 1) {
+        log(`Multiple matches for "${productName}". Using first match`)
       }
 
-      await productCard.scrollIntoViewIfNeeded()
-      await expect(productCard).toBeVisible({
+      const targetProductCard = productCard.first()
+      await targetProductCard.scrollIntoViewIfNeeded()
+      await expect(targetProductCard).toBeVisible({
         timeout: TEST_CONFIG.timeouts.medium,
       })
-      await productCard.click()
-      await this.page.waitForLoadState("networkidle") // Wait for product details page to load
+      await targetProductCard.click()
+
+      // Wait for product details page to load
+      await this.page.waitForLoadState("domcontentloaded")
       await expect(this.addToCartButton).toBeVisible({
         timeout: TEST_CONFIG.timeouts.medium,
       })
+
+      log(`Successfully navigated to product detail page for "${productName}"`)
     })
   }
 
@@ -77,6 +97,7 @@ class ProductPage {
         timeout: TEST_CONFIG.timeouts.short,
       })
       await this.addToCartButton.click()
+      log("Clicked on 'Add to Cart' button.")
     })
   }
 
@@ -88,6 +109,7 @@ class ProductPage {
         timeout: TEST_CONFIG.timeouts.short,
       })
       await this.addToFavouritesButton.click()
+      log("Clicked on 'Add to Favourites' button.")
     })
   }
 
@@ -99,9 +121,10 @@ class ProductPage {
   async expectToastMessage(expectedText: string) {
     await test.step(`Verify toast message contains: ${expectedText}`, async () => {
       await expect(this.toastNotification).toBeVisible({
-        timeout: TEST_CONFIG.timeouts.short,
+        timeout: TEST_CONFIG.timeouts.medium,
       })
       await expect(this.toastNotification).toContainText(expectedText)
+      log(`Toast message verified: "${expectedText}"`)
     })
   }
 }

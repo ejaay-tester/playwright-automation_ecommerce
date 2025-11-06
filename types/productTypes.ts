@@ -1,6 +1,5 @@
-type ProductName = string
-
-type ProductMeta = {
+// Single product definition
+export type ProductMeta = {
   id: string
   name: string
   description: string
@@ -8,4 +7,11 @@ type ProductMeta = {
   category: string[] // An array of strings
 }
 
-export type Products = Record<ProductName, ProductMeta>
+// A collection of products (dictionary)
+export type Products = Record<string, ProductMeta>
+
+// A single product used in Add to Cart tests
+export type AddToCartTestProduct = ProductMeta & {
+  addToCartMessage: string
+  invalidMessage: string
+}
