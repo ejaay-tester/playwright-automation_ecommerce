@@ -3,21 +3,32 @@ import { TEST_CONFIG } from "../config/testConfig"
 import { log } from "../utils/logger"
 import { getProductCardByName } from "../utils/helpers/elementHelper"
 
-class ProductPage {
+export default class ProductPage {
   private readonly page: Page
   private readonly productCards: Locator
-  private readonly productName: Locator
+
+  private readonly increaseQuantityButton: Locator
+  private readonly decreaseQuantityButton: Locator
+  private readonly quantityLabel: Locator
   private readonly addToCartButton: Locator
   private readonly addToFavouritesButton: Locator
   private readonly toastNotification: Locator
+  private readonly cartButton: Locator
 
   constructor(page: Page) {
     this.page = page
     this.productCards = page.locator('a[data-test^="product-"]')
-    this.productName = page.locator('h5[data-test="product-name"]')
+    this.increaseQuantityButton = page.locator(
+      'button[data-test="increase-quantity"]'
+    )
+    this.decreaseQuantityButton = page.locator(
+      'button[data-test="decrease-quantity"]'
+    )
+    this.quantityLabel = page.locator('input[data-test="quantity"]')
     this.addToCartButton = page.getByRole("button", { name: /add to cart/i })
     this.addToFavouritesButton = page.locator("#btn-add-to-favorites")
     this.toastNotification = page.locator("#toast-container")
+    this.cartButton = page.locator('a[data-test="nav-cart"]')
   }
 
   // ==========
@@ -38,6 +49,16 @@ class ProductPage {
         timeout: TEST_CONFIG.timeouts.medium,
       })
       log("Product listing page loaded successfully")
+    })
+  }
+
+  async navigateToCartItems() {
+    await test.step("Navigate to Cart Items Page", async () => {
+      // Cart items page
+      await this.page.goto(`${TEST_CONFIG.baseURL}/checkout`, {
+        waitUntil: "domcontentloaded",
+        timeout: TEST_CONFIG.timeouts.long,
+      })
     })
   }
 
@@ -116,9 +137,39 @@ class ProductPage {
     })
   }
 
+  // Increase the quantity of the selected product
+  async increaseQuantityTo(desiredQuantity: number) {
+    await test.step(`Increase the selected product quantity to ${desiredQuantity}`, async () => {
+      await this.increaseQuantityButton.scrollIntoViewIfNeeded()
+      await expect(this.increaseQuantityButton).toBeVisible({
+        timeout: TEST_CONFIG.timeouts.medium,
+      })
+      const initialQuantity = 1
+      for (let i = initialQuantity; i < desiredQuantity; i++) {
+        await this.increaseQuantityButton.click()
+        console.log("Product quantity added by 1.")
+      }
+    })
+  }
+
   // ==========
   // ASSERTIONS
   // ==========
+
+  // Assert quantity based on the number of clicks on increase quantity button
+  async expectQuantityLabel(expectedQuantity: number) {
+    await test.step(`Verify quantity equals ${expectedQuantity}`, async () => {
+      await expect(this.quantityLabel).toBeVisible({
+        timeout: TEST_CONFIG.timeouts.medium,
+      })
+      await expect(this.quantityLabel).toHaveValue(
+        expectedQuantity.toString(),
+        {
+          timeout: TEST_CONFIG.timeouts.medium,
+        }
+      )
+    })
+  }
 
   // Assert toast notification after adding the product in the cart
   async expectToastMessage(expectedText: string) {
@@ -131,5 +182,3 @@ class ProductPage {
     })
   }
 }
-
-export default ProductPage

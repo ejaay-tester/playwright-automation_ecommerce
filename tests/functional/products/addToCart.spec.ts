@@ -41,4 +41,17 @@ test.describe("Add to Cart Feature Test - Core Functionality", () => {
       await productPage.expectToastMessage(product.addToCartMessage)
     }
   })
+
+  test.only("JIRA-204: Increase the quantity of the selected product to 5", async ({
+    page,
+  }) => {
+    const productPage = new ProductPage(page)
+
+    await productPage.navigateToProductListing()
+    await productPage.selectProductByName(products.hammer.name)
+    await productPage.increaseQuantityTo(5)
+    await productPage.expectQuantityLabel(5)
+    await productPage.addProductToCart()
+    await productPage.expectToastMessage("Product added to shopping cart")
+  })
 })
