@@ -49,23 +49,32 @@ test.describe("Add to Cart Feature Test - Core Functionality", () => {
 
     await productPage.navigateToProductListing()
     await productPage.selectProductByName(products.hammer.name)
-    await productPage.increaseQuantityTo(5)
+    await productPage.setQuantityTo(5)
     await productPage.expectQuantityLabel(5)
     await productPage.addProductToCart()
     await productPage.expectToastMessage("Product added to shopping cart")
   })
 
-  test.only("JIRA-205: Decrease the quantity of the selected product by 3", async ({
+  test.only("JIRA-205: Decrease the quantity of the selected product to 5", async ({
     page,
   }) => {
     const productPage = new ProductPage(page)
 
+    // Step 1: Navigate the product listing page
     await productPage.navigateToProductListing()
+
+    // Step 2: Select the product you want to add in the cart
     await productPage.selectProductByName(products.hammer.name)
-    await productPage.increaseQuantityTo(5)
+
+    // Step 3: Set the desired quantity (increase) of the product
+    await productPage.setQuantityTo(5)
     await productPage.expectQuantityLabel(5)
-    await productPage.decreaseQuantityTo(3)
-    await productPage.expectQuantityLabel(2)
+
+    // Step 4: Set the desired quantity (decrease) of the product
+    await productPage.setQuantityTo(3)
+    await productPage.expectQuantityLabel(3)
+
+    // Step 5: Add the product in the cart after setting the desired quantity
     await productPage.addProductToCart()
     await productPage.expectToastMessage("Product added to shopping cart")
   })

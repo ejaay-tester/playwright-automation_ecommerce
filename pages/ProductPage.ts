@@ -30,20 +30,20 @@ export default class ProductPage {
     this.cartButton = page.locator('a[data-test="nav-cart"]')
   }
 
-  // ==========
-  // NAVIGATION
-  // ==========
+  //   ==========
+  //   NAVIGATION
+  //   ==========
 
-  // Navigate to the landing page first, then select product to add in the cart
+  //   Navigate to the landing page first, then select product to add in the cart
   async navigateToProductListing() {
     await test.step("Navigate to Product Listing Page", async () => {
-      // Products page
+      //   Products page
       await this.page.goto(TEST_CONFIG.baseURL, {
         waitUntil: "domcontentloaded", // Loads faster, less prone to hang
         timeout: TEST_CONFIG.timeouts.long,
       })
 
-      // Ensure at least one product card is visible
+      //   Ensure at least one product card is visible
       await expect(this.productCards.first()).toBeVisible({
         timeout: TEST_CONFIG.timeouts.medium,
       })
@@ -53,7 +53,7 @@ export default class ProductPage {
 
   async navigateToCartItems() {
     await test.step("Navigate to Cart Items Page", async () => {
-      // Cart items page
+      //   Cart items page
       await this.page.goto(`${TEST_CONFIG.baseURL}/checkout`, {
         waitUntil: "domcontentloaded",
         timeout: TEST_CONFIG.timeouts.long,
@@ -61,30 +61,30 @@ export default class ProductPage {
     })
   }
 
-  // ==========
-  // ACTIONS
-  // ==========
+  //   ==========
+  //   ACTIONS
+  //   ==========
 
-  // Select specific product from the product listing page
+  //   Select specific product from the product listing page
   async selectProductByName(productName: string) {
     await test.step(`Select product "${productName}" from product listing`, async () => {
-      // Target the product card containing <h5 data-test="product-name">
-      //   const productCard = this.page.locator('a[data-test^="product-"]', {
-      //     has: this.page.locator('h5[data-test="product-name"]', {
-      //       hasText: new RegExp(`^\\s*${productName}\\s*$`, "i"),
-      //     }),
-      //   })
-      // OR
+      //   Target the product card containing <h5 data-test="product-name">
+      //     const productCard = this.page.locator('a[data-test^="product-"]', {
+      //       has: this.page.locator('h5[data-test="product-name"]', {
+      //         hasText: new RegExp(`^\\s*${productName}\\s*$`, "i"),
+      //       }),
+      //     })
+      //   OR
 
-      //   const productCard = this.productCards.filter({
-      //     has: this.productName.filter({
-      //       hasText: new RegExp(`^\\s*${productName}\\s*$`, "i"),
-      //     }),
-      //   })
+      //     const productCard = this.productCards.filter({
+      //       has: this.productName.filter({
+      //         hasText: new RegExp(`^\\s*${productName}\\s*$`, "i"),
+      //       }),
+      //     })
 
       const productCard = getProductCardByName(this.page, productName)
 
-      // For debugging purposes only...
+      //   For debugging purposes only...
       const totalMatchedProduct = await productCard.count()
       log(`Found ${totalMatchedProduct} product(s) matching "${productName}"`)
 
@@ -102,7 +102,7 @@ export default class ProductPage {
       })
       await targetProductCard.click()
 
-      // Wait for product details page to load
+      //   Wait for product details page to load
       await this.page.waitForLoadState("domcontentloaded")
       await expect(this.addToCartButton).toBeVisible({
         timeout: TEST_CONFIG.timeouts.medium,
@@ -112,7 +112,7 @@ export default class ProductPage {
     })
   }
 
-  // Add the selected product to the cart
+  //   Add the selected product to the cart
   async addProductToCart() {
     await test.step("Add the selected product to the cart", async () => {
       await this.addToCartButton.scrollIntoViewIfNeeded()
@@ -124,7 +124,7 @@ export default class ProductPage {
     })
   }
 
-  // Add the selected product to the favourites
+  //   Add the selected product to the favourites
   async addProductToFavorites() {
     await test.step("Add the selected product to favourites", async () => {
       await this.addToFavouritesButton.scrollIntoViewIfNeeded()
@@ -136,82 +136,60 @@ export default class ProductPage {
     })
   }
 
-  // Increase the quantity of the selected product
-  async increaseQuantityTo(desiredIncrease: number) {
-    await test.step(`Increase the selected product quantity to ${desiredIncrease}`, async () => {
-      await this.increaseQuantityButton.scrollIntoViewIfNeeded()
-      await expect(this.increaseQuantityButton).toBeVisible({
-        timeout: TEST_CONFIG.timeouts.medium,
-      })
+  //   Helper to get current quantity value
+  async getQuantity(): Promise<number> {
+    return parseInt(await this.quantityLabel.inputValue(), 10)
+  }
 
-      // This is the initial quantity of the selected product
-      const raw = await this.quantityLabel.inputValue()
-      const initialQuantity = parseInt(raw || "0", 10)
+  //   Universal method to set the quantity (Increase and Decrease)
+  async setQuantityTo(targetQuantity: number) {
+    await test.step(`Set product quantity to ${targetQuantity}`, async () => {
+      await this.quantityLabel.scrollIntoViewIfNeeded()
 
-      const clicksNeeded = desiredIncrease - initialQuantity // If the desired quantity is 5 and the initial quantity is 1, the clicks needed should be 4.
+      const currentQuantity = await this.getQuantity()
+
+      if (targetQuantity < 1)
+        throw new Error(
+          `Target quantity must be positive: received ${targetQuantity} `
+        )
+
+      // if (currentQuantity === targetQuantity)
+      //   throw new Error(
+      //     `Quantity already at ${targetQuantity}. No changes applied.`
+      //   )
+
+      if (currentQuantity === targetQuantity) {
+        log(`Quantity already at ${targetQuantity}. Skipping update.`)
+        return // Do NOT throw
+      }
+
+      const isIncrease = targetQuantity > currentQuantity
+      const quantitySetterButton = isIncrease
+        ? this.increaseQuantityButton
+        : this.decreaseQuantityButton
+
+      // Get the absolute value for the clicks needed to set the quantity
+      // Math.abs() method only gets the absolute value, it disregards whether the value is positive or negative
+      const clicksNeeded = Math.abs(targetQuantity - currentQuantity)
 
       for (let i = 0; i < clicksNeeded; i++) {
-        await this.increaseQuantityButton.click()
-        // Wait 500ms or 5 secs between clicks
-        // await this.page.waitForTimeout(150)
-        await expect(this.quantityLabel).toHaveValue(
-          (initialQuantity + i + 1).toString()
-        )
-        console.log(`Product quantity increased: ${initialQuantity + i + 1}`) // 0 - 2 | 1 - 3 | 2 - 4 | 3 - 5
+        await quantitySetterButton.click()
+
+        const expectedValue = isIncrease
+          ? currentQuantity + (i + 1)
+          : currentQuantity - (i + 1)
+
+        await expect(this.quantityLabel).toHaveValue(expectedValue.toString())
+        console.log(`Quantity updated: ${expectedValue}`)
       }
     })
   }
 
-  //   Decrease the quantity of the selected product
-  async decreaseQuantityTo(desiredDecrease: number) {
-    await test.step(`Decrease the selected product quantity by ${desiredDecrease}`, async () => {
-      await this.decreaseQuantityButton.scrollIntoViewIfNeeded()
-      await expect(this.decreaseQuantityButton).toBeVisible({
-        timeout: TEST_CONFIG.timeouts.medium,
-      })
+  //   ==========
+  //   ASSERTIONS
+  //   ==========
 
-      //   Current quantity of the selected product
-      const currentQuantity = parseInt(
-        await this.quantityLabel.inputValue(),
-        10
-      )
-
-      //   Expected final quantity less the desired decrease
-      //   Example the current quantity is 10 and the desired decrease is 5, the expected total quantity should be 5
-      const expectedFinalQuantity = currentQuantity - desiredDecrease
-
-      //   Throws an error if the desired decrease is less than the initial quantity which is 1
-      if (desiredDecrease <= 0)
-        throw new Error(
-          `Desired decrease must be positive: received ${desiredDecrease} `
-        )
-
-      //   Throws an error if the expected final quantity is less than 1
-      //   Final quantity should at least 1 to be able to add the product in the cart
-      if (expectedFinalQuantity < 1)
-        throw new Error(
-          `Cannot decrease quantity below 1. Current: ${currentQuantity}, Desired Decrease: ${desiredDecrease}`
-        )
-
-      //   IF condition to check if the current quantity is still greater than the expected final quantity
-      if (currentQuantity > expectedFinalQuantity) {
-        for (let i = 0; i < desiredDecrease; i++) {
-          await this.decreaseQuantityButton.click()
-
-          const expectedValue = currentQuantity - (i + 1)
-
-          await expect(this.quantityLabel).toHaveValue(expectedValue.toString())
-          console.log(`Product quantity decreased: ${expectedValue}`)
-        }
-      }
-    })
-  }
-
-  // ==========
-  // ASSERTIONS
-  // ==========
-
-  // Assert quantity based on the number of clicks on increase quantity button
+  //   Assert quantity based on the number of clicks on increase quantity button
   async expectQuantityLabel(expectedQuantity: number) {
     await test.step(`Verify quantity equals ${expectedQuantity}`, async () => {
       await expect(this.quantityLabel).toBeVisible({
@@ -226,7 +204,7 @@ export default class ProductPage {
     })
   }
 
-  // Assert toast notification after adding the product in the cart
+  //   Assert toast notification after adding the product in the cart
   async expectToastMessage(expectedText: string) {
     await test.step(`Verify toast message contains: ${expectedText}`, async () => {
       await expect(this.toastNotification).toBeVisible({
