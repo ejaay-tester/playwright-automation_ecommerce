@@ -42,7 +42,7 @@ test.describe("Add to Cart Feature Test - Core Functionality", () => {
     }
   })
 
-  test.only("JIRA-204: Increase the quantity of the selected product to 5", async ({
+  test("JIRA-204: Increase the quantity of the selected product to 5", async ({
     page,
   }) => {
     const productPage = new ProductPage(page)
@@ -51,6 +51,21 @@ test.describe("Add to Cart Feature Test - Core Functionality", () => {
     await productPage.selectProductByName(products.hammer.name)
     await productPage.increaseQuantityTo(5)
     await productPage.expectQuantityLabel(5)
+    await productPage.addProductToCart()
+    await productPage.expectToastMessage("Product added to shopping cart")
+  })
+
+  test.only("JIRA-205: Decrease the quantity of the selected product by 3", async ({
+    page,
+  }) => {
+    const productPage = new ProductPage(page)
+
+    await productPage.navigateToProductListing()
+    await productPage.selectProductByName(products.hammer.name)
+    await productPage.increaseQuantityTo(5)
+    await productPage.expectQuantityLabel(5)
+    await productPage.decreaseQuantityTo(3)
+    await productPage.expectQuantityLabel(2)
     await productPage.addProductToCart()
     await productPage.expectToastMessage("Product added to shopping cart")
   })

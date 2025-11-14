@@ -6,7 +6,6 @@ import { getProductCardByName } from "../utils/helpers/elementHelper"
 export default class ProductPage {
   private readonly page: Page
   private readonly productCards: Locator
-
   private readonly increaseQuantityButton: Locator
   private readonly decreaseQuantityButton: Locator
   private readonly quantityLabel: Locator
@@ -27,7 +26,7 @@ export default class ProductPage {
     this.quantityLabel = page.locator('input[data-test="quantity"]')
     this.addToCartButton = page.getByRole("button", { name: /add to cart/i })
     this.addToFavouritesButton = page.locator("#btn-add-to-favorites")
-    this.toastNotification = page.locator("#toast-container")
+    this.toastNotification = page.getByRole("alert")
     this.cartButton = page.locator('a[data-test="nav-cart"]')
   }
 
@@ -138,16 +137,72 @@ export default class ProductPage {
   }
 
   // Increase the quantity of the selected product
-  async increaseQuantityTo(desiredQuantity: number) {
-    await test.step(`Increase the selected product quantity to ${desiredQuantity}`, async () => {
+  async increaseQuantityTo(desiredIncrease: number) {
+    await test.step(`Increase the selected product quantity to ${desiredIncrease}`, async () => {
       await this.increaseQuantityButton.scrollIntoViewIfNeeded()
       await expect(this.increaseQuantityButton).toBeVisible({
         timeout: TEST_CONFIG.timeouts.medium,
       })
-      const initialQuantity = 1
-      for (let i = initialQuantity; i < desiredQuantity; i++) {
+
+      // This is the initial quantity of the selected product
+      const raw = await this.quantityLabel.inputValue()
+      const initialQuantity = parseInt(raw || "0", 10)
+
+      const clicksNeeded = desiredIncrease - initialQuantity // If the desired quantity is 5 and the initial quantity is 1, the clicks needed should be 4.
+
+      for (let i = 0; i < clicksNeeded; i++) {
         await this.increaseQuantityButton.click()
-        console.log("Product quantity added by 1.")
+        // Wait 500ms or 5 secs between clicks
+        // await this.page.waitForTimeout(150)
+        await expect(this.quantityLabel).toHaveValue(
+          (initialQuantity + i + 1).toString()
+        )
+        console.log(`Product quantity increased: ${initialQuantity + i + 1}`) // 0 - 2 | 1 - 3 | 2 - 4 | 3 - 5
+      }
+    })
+  }
+
+  //   Decrease the quantity of the selected product
+  async decreaseQuantityTo(desiredDecrease: number) {
+    await test.step(`Decrease the selected product quantity by ${desiredDecrease}`, async () => {
+      await this.decreaseQuantityButton.scrollIntoViewIfNeeded()
+      await expect(this.decreaseQuantityButton).toBeVisible({
+        timeout: TEST_CONFIG.timeouts.medium,
+      })
+
+      //   Current quantity of the selected product
+      const currentQuantity = parseInt(
+        await this.quantityLabel.inputValue(),
+        10
+      )
+
+      //   Expected final quantity less the desired decrease
+      //   Example the current quantity is 10 and the desired decrease is 5, the expected total quantity should be 5
+      const expectedFinalQuantity = currentQuantity - desiredDecrease
+
+      //   Throws an error if the desired decrease is less than the initial quantity which is 1
+      if (desiredDecrease <= 0)
+        throw new Error(
+          `Desired decrease must be positive: received ${desiredDecrease} `
+        )
+
+      //   Throws an error if the expected final quantity is less than 1
+      //   Final quantity should at least 1 to be able to add the product in the cart
+      if (expectedFinalQuantity < 1)
+        throw new Error(
+          `Cannot decrease quantity below 1. Current: ${currentQuantity}, Desired Decrease: ${desiredDecrease}`
+        )
+
+      //   IF condition to check if the current quantity is still greater than the expected final quantity
+      if (currentQuantity > expectedFinalQuantity) {
+        for (let i = 0; i < desiredDecrease; i++) {
+          await this.decreaseQuantityButton.click()
+
+          const expectedValue = currentQuantity - (i + 1)
+
+          await expect(this.quantityLabel).toHaveValue(expectedValue.toString())
+          console.log(`Product quantity decreased: ${expectedValue}`)
+        }
       }
     })
   }
@@ -178,6 +233,7 @@ export default class ProductPage {
         timeout: TEST_CONFIG.timeouts.medium,
       })
       await expect(this.toastNotification).toContainText(expectedText)
+
       log(`Toast message verified: "${expectedText}"`)
     })
   }
