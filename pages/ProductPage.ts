@@ -68,32 +68,17 @@ export default class ProductPage {
   //   Select specific product from the product listing page
   async selectProductByName(productName: string) {
     await test.step(`Select product "${productName}" from product listing`, async () => {
-      //   Target the product card containing <h5 data-test="product-name">
-      //     const productCard = this.page.locator('a[data-test^="product-"]', {
-      //       has: this.page.locator('h5[data-test="product-name"]', {
-      //         hasText: new RegExp(`^\\s*${productName}\\s*$`, "i"),
-      //       }),
-      //     })
-      //   OR
-
-      //     const productCard = this.productCards.filter({
-      //       has: this.productName.filter({
-      //         hasText: new RegExp(`^\\s*${productName}\\s*$`, "i"),
-      //       }),
-      //     })
-
       const productCard = getProductCardByName(this.page, productName)
 
       //   For debugging purposes only...
       const totalMatchedProduct = await productCard.count()
       log(`Found ${totalMatchedProduct} product(s) matching "${productName}"`)
 
-      if (totalMatchedProduct === 0) {
+      if (totalMatchedProduct === 0)
         throw new Error(`No product found with name: "${productName}"`)
-      }
-      if (totalMatchedProduct > 1) {
+
+      if (totalMatchedProduct > 1)
         log(`Multiple matches for "${productName}". Using first match`)
-      }
 
       const targetProductCard = productCard.first()
       await targetProductCard.scrollIntoViewIfNeeded()
@@ -136,46 +121,57 @@ export default class ProductPage {
     })
   }
 
-  //   Helper to get current quantity value
+  // Helper to get current quantity value
   async getQuantity(): Promise<number> {
     return parseInt(await this.quantityLabel.inputValue(), 10)
   }
 
-  //   Universal method to set the quantity (Increase and Decrease)
+  // Universal method to set the quantity (Increase and Decrease)
+  // Automatically decides whether to increase or decrease
+  // Accepts any target quantity
   async setQuantityTo(targetQuantity: number) {
     await test.step(`Set product quantity to ${targetQuantity}`, async () => {
+      // Locate the quantityLabel locator
       await this.quantityLabel.scrollIntoViewIfNeeded()
 
+      // Fetch the current quantity value of the selected product
       const currentQuantity = await this.getQuantity()
 
+      // IF condition to throw an ERROR if the inputted TARGET QUANTITY is less than 1
       if (targetQuantity < 1)
         throw new Error(
-          `Target quantity must be positive: received ${targetQuantity} `
+          `Error: Target quantity must be positive number/integer | Received input: ${targetQuantity} `
         )
 
-      // if (currentQuantity === targetQuantity)
-      //   throw new Error(
-      //     `Quantity already at ${targetQuantity}. No changes applied.`
-      //   )
-
+      // IF condition to log if the CURRENT QUANTITY is equals to the inputted TARGET QUANTITY
       if (currentQuantity === targetQuantity) {
-        log(`Quantity already at ${targetQuantity}. Skipping update.`)
-        return // Do NOT throw
+        console.log(
+          `Info: Quantity already at ${targetQuantity}. Skipping update.`
+        )
+        return // Do not throw an error
       }
 
-      const isIncrease = targetQuantity > currentQuantity
-      const quantitySetterButton = isIncrease
+      // Declares a immutable variable for increase (+)
+      // Target quantity should be greater than the current quantity
+      const increasing = targetQuantity > currentQuantity
+
+      // Ternary operator for which button to trigger or click for setting the quantity
+      // Linked to the increasing variable
+      const quantitySetterButton = increasing
         ? this.increaseQuantityButton
         : this.decreaseQuantityButton
 
+      // Calculates exactly how many clicks are needed
       // Get the absolute value for the clicks needed to set the quantity
       // Math.abs() method only gets the absolute value, it disregards whether the value is positive or negative
-      const clicksNeeded = Math.abs(targetQuantity - currentQuantity)
+      const clicksNeededToUpdateQuantity = Math.abs(
+        targetQuantity - currentQuantity
+      )
 
-      for (let i = 0; i < clicksNeeded; i++) {
+      for (let i = 0; i < clicksNeededToUpdateQuantity; i++) {
         await quantitySetterButton.click()
 
-        const expectedValue = isIncrease
+        const expectedValue = increasing
           ? currentQuantity + (i + 1)
           : currentQuantity - (i + 1)
 

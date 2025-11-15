@@ -71,8 +71,8 @@ test.describe("Add to Cart Feature Test - Core Functionality", () => {
     await productPage.expectQuantityLabel(5)
 
     // Step 4: Set the desired quantity (decrease) of the product
-    await productPage.setQuantityTo(3)
-    await productPage.expectQuantityLabel(3)
+    await productPage.setQuantityTo(2)
+    await productPage.expectQuantityLabel(2)
 
     // Step 5: Add the product in the cart after setting the desired quantity
     await productPage.addProductToCart()
