@@ -3,6 +3,7 @@ import { TEST_CONFIG } from "../config/testConfig"
 import { log } from "../utils/logger"
 import { getProductCardByName } from "../utils/helpers/elementHelper"
 import Toast from "../components/Toast"
+import QuantitySetter from "../components/QuantitySetter"
 
 export default class ProductPage {
   private readonly page: Page
@@ -17,7 +18,8 @@ export default class ProductPage {
   private readonly toastRoot: Locator
   private readonly cartButton: Locator
 
-  // Components
+  // Components Reference
+  readonly quantity: QuantitySetter
   readonly toast: Toast
 
   constructor(page: Page) {
@@ -38,6 +40,12 @@ export default class ProductPage {
     this.cartButton = page.locator('a[data-test="nav-cart"]')
 
     // Initialize components
+    this.quantity = new QuantitySetter(
+      this.quantityLabel,
+      this.increaseQuantityButton,
+      this.decreaseQuantityButton
+    )
+
     this.toast = new Toast(this.toastRoot)
   }
 
@@ -132,95 +140,9 @@ export default class ProductPage {
     })
   }
 
-  // Helper to get current quantity value
-  async getQuantity(): Promise<number> {
-    return parseInt(await this.quantityLabel.inputValue(), 10)
-  }
-
-  // Universal method to set the quantity (Increase and Decrease)
-  // Automatically decides whether to increase or decrease
-  // Accepts any target quantity
-  async setQuantityTo(targetQuantity: number) {
-    await test.step(`Set product quantity to ${targetQuantity}`, async () => {
-      // Locate the quantityLabel locator
-      await this.quantityLabel.scrollIntoViewIfNeeded()
-
-      // Fetch the current quantity value of the selected product
-      const currentQuantity = await this.getQuantity()
-
-      // IF condition to throw an ERROR if the inputted TARGET QUANTITY is less than 1
-      if (targetQuantity < 1)
-        throw new Error(
-          `Error: Target quantity must be positive number/integer | Received input: ${targetQuantity} `
-        )
-
-      // IF condition to log if the CURRENT QUANTITY is equals to the inputted TARGET QUANTITY
-      if (currentQuantity === targetQuantity) {
-        console.log(
-          `Info: Quantity already at ${targetQuantity}. Skipping update.`
-        )
-        return // Do not throw an error
-      }
-
-      // Declares a immutable variable for increase (+)
-      // Target quantity should be greater than the current quantity
-      const increasing = targetQuantity > currentQuantity
-
-      // Ternary operator for which button to trigger or click for setting the quantity
-      // Linked to the increasing variable
-      const quantitySetterButton = increasing
-        ? this.increaseQuantityButton
-        : this.decreaseQuantityButton
-
-      // Calculates exactly how many clicks are needed
-      // Get the absolute value for the clicks needed to set the quantity
-      // Math.abs() method only gets the absolute value, it disregards whether the value is positive or negative
-      const clicksNeededToUpdateQuantity = Math.abs(
-        targetQuantity - currentQuantity
-      )
-
-      for (let i = 0; i < clicksNeededToUpdateQuantity; i++) {
-        await quantitySetterButton.click()
-
-        const expectedValue = increasing
-          ? currentQuantity + (i + 1)
-          : currentQuantity - (i + 1)
-
-        await expect(this.quantityLabel).toHaveValue(expectedValue.toString())
-        console.log(`Quantity updated: ${expectedValue}`)
-      }
-    })
-  }
-
   //   ==========
   //   ASSERTIONS
   //   ==========
-
-  //   Assert quantity based on the number of clicks on increase quantity button
-  async expectQuantityLabel(expectedQuantity: number) {
-    await test.step(`Verify quantity equals ${expectedQuantity}`, async () => {
-      await expect(this.quantityLabel).toBeVisible({
-        timeout: TEST_CONFIG.timeouts.medium,
-      })
-      await expect(this.quantityLabel).toHaveValue(
-        expectedQuantity.toString(),
-        {
-          timeout: TEST_CONFIG.timeouts.medium,
-        }
-      )
-    })
-  }
-
-  // async expectToastMessage(expectedText: string) {
-  //   await test.step(`Verify toast message contains: ${expectedText}`, async () => {
-  //     await expect(this.toastNotification).toBeVisible({
-  //       timeout: TEST_CONFIG.timeouts.medium,
-  //     })
-  //     await expect(this.toastNotification).toContainText(expectedText)
-
-  //     log(`Toast message verified: "${expectedText}"`)
-  //   })
-  // }
 
   //   Assert toast notification after adding the product in the cart
   async expectToastMessage(text: string) {
