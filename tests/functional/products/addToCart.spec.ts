@@ -76,6 +76,9 @@ test.describe("Add to Cart Feature Test - Core Functionality", () => {
 
     // Step 5: Add the product in the cart after setting the desired quantity
     await productPage.addProductToCart()
-    await productPage.expectToastMessage("Product added to shopping cart")
+
+    await test.step("Verify success toast message", async () => {
+      await productPage.expectToastMessage("Product added to shopping cart")
+    })
   })
 })

@@ -2,20 +2,28 @@ import { test, expect, Page, Locator } from "@playwright/test"
 import { TEST_CONFIG } from "../config/testConfig"
 import { log } from "../utils/logger"
 import { getProductCardByName } from "../utils/helpers/elementHelper"
+import Toast from "../components/Toast"
 
 export default class ProductPage {
   private readonly page: Page
+
+  // Locators
   private readonly productCards: Locator
   private readonly increaseQuantityButton: Locator
   private readonly decreaseQuantityButton: Locator
   private readonly quantityLabel: Locator
   private readonly addToCartButton: Locator
   private readonly addToFavouritesButton: Locator
-  private readonly toastNotification: Locator
+  private readonly toastRoot: Locator
   private readonly cartButton: Locator
+
+  // Components
+  readonly toast: Toast
 
   constructor(page: Page) {
     this.page = page
+
+    // Initialize locators
     this.productCards = page.locator('a[data-test^="product-"]')
     this.increaseQuantityButton = page.locator(
       'button[data-test="increase-quantity"]'
@@ -26,8 +34,11 @@ export default class ProductPage {
     this.quantityLabel = page.locator('input[data-test="quantity"]')
     this.addToCartButton = page.getByRole("button", { name: /add to cart/i })
     this.addToFavouritesButton = page.locator("#btn-add-to-favorites")
-    this.toastNotification = page.getByRole("alert")
+    this.toastRoot = page.getByRole("alert")
     this.cartButton = page.locator('a[data-test="nav-cart"]')
+
+    // Initialize components
+    this.toast = new Toast(this.toastRoot)
   }
 
   //   ==========
@@ -200,15 +211,19 @@ export default class ProductPage {
     })
   }
 
-  //   Assert toast notification after adding the product in the cart
-  async expectToastMessage(expectedText: string) {
-    await test.step(`Verify toast message contains: ${expectedText}`, async () => {
-      await expect(this.toastNotification).toBeVisible({
-        timeout: TEST_CONFIG.timeouts.medium,
-      })
-      await expect(this.toastNotification).toContainText(expectedText)
+  // async expectToastMessage(expectedText: string) {
+  //   await test.step(`Verify toast message contains: ${expectedText}`, async () => {
+  //     await expect(this.toastNotification).toBeVisible({
+  //       timeout: TEST_CONFIG.timeouts.medium,
+  //     })
+  //     await expect(this.toastNotification).toContainText(expectedText)
 
-      log(`Toast message verified: "${expectedText}"`)
-    })
+  //     log(`Toast message verified: "${expectedText}"`)
+  //   })
+  // }
+
+  //   Assert toast notification after adding the product in the cart
+  async expectToastMessage(text: string) {
+    await this.toast.expectMessage(text)
   }
 }
