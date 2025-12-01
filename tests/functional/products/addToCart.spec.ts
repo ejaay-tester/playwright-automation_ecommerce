@@ -60,13 +60,14 @@ test.describe("Add to Cart Feature Test - Core Functionality", () => {
   }) => {
     const productPage = new ProductPage(page)
 
-    // Step 1: Navigate the product listing page
-    await productPage.navigateToProductListing()
+    await test.step("Step 1: Navigate to the product listing page", async () => {
+      await productPage.navigateToProductListing()
+    })
 
-    // Step 2: Select the product you want to add in the cart
-    await productPage.selectProductByName(products.hammer.name)
+    await test.step("Step 2: Select the product you want to add in the cart", async () => {
+      await productPage.selectProductByName(products.hammer.name)
+    })
 
-    // Step 3: Set the desired quantity (increase) of the product
     // New way: delegate to component
     // Quantity Component Usage
     await test.step("Step 3: Increase the quantity of the selected product to 5", async () => {
@@ -74,7 +75,6 @@ test.describe("Add to Cart Feature Test - Core Functionality", () => {
       await productPage.quantity.expectedValue(5)
     })
 
-    // Step 4: Set the desired quantity (decrease) of the product
     // New way: delegate to component
     // Quantity Component Usage
     await test.step("Step 4: Decrease the quantity of the selected product to 3", async () => {
@@ -82,11 +82,11 @@ test.describe("Add to Cart Feature Test - Core Functionality", () => {
       await productPage.quantity.expectedValue(2)
     })
 
-    // Step 5: Add the product in the cart after setting the desired quantity
     // Page-level interaction
-    await productPage.addProductToCart()
+    await test.step("Step 5: Add the product in the cart after setting the desired quantity", async () => {
+      await productPage.addProductToCart()
+    })
 
-    // Step 6: Verify the quantity label, it should match the target quantity
     // Toast Component Verification
     await test.step("Step 6: Verify success toast message", async () => {
       await productPage.expectToastMessage("Product added to shopping cart")
