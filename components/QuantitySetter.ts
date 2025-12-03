@@ -2,11 +2,22 @@ import { expect, Locator } from "@playwright/test"
 import { TEST_CONFIG } from "config/testConfig"
 
 export default class QuantitySetter {
-  constructor(
-    private readonly quantityInputLabel: Locator,
-    private readonly increaseQuantityButton: Locator,
-    private readonly decreaseQuantityButton: Locator
-  ) {}
+  //  Locators
+  private readonly root: Locator
+  private readonly quantityInputLabel: Locator
+  private readonly increaseQuantityButton: Locator
+  private readonly decreaseQuantityButton: Locator
+
+  constructor(root: Locator) {
+    this.root = root
+    this.quantityInputLabel = root.locator('input[data-test="quantity"]')
+    this.increaseQuantityButton = root.locator(
+      'button[data-test="increase-quantity"]'
+    )
+    this.decreaseQuantityButton = root.locator(
+      'button[data-test="decrease-quantity"]'
+    )
+  }
 
   //    Helper to get the current quantity value
   async getQuantityValue(): Promise<number> {

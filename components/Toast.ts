@@ -2,7 +2,12 @@ import { Locator, expect } from "@playwright/test"
 import { TEST_CONFIG } from "config/testConfig"
 
 export default class Toast {
-  constructor(private readonly root: Locator) {}
+  //  Locators
+  private readonly root: Locator
+
+  constructor(root: Locator) {
+    this.root = root
+  }
 
   async expectMessage(text: string) {
     await expect(this.root).toBeVisible({

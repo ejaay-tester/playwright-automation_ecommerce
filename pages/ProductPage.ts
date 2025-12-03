@@ -10,12 +10,8 @@ export default class ProductPage {
 
   // Locators
   private readonly productCards: Locator
-  private readonly increaseQuantityButton: Locator
-  private readonly decreaseQuantityButton: Locator
-  private readonly quantityLabel: Locator
   private readonly addToCartButton: Locator
   private readonly addToFavouritesButton: Locator
-  private readonly toastRoot: Locator
   private readonly cartButton: Locator
 
   // Components Reference
@@ -27,26 +23,15 @@ export default class ProductPage {
 
     // Initialize locators
     this.productCards = page.locator('a[data-test^="product-"]')
-    this.increaseQuantityButton = page.locator(
-      'button[data-test="increase-quantity"]'
-    )
-    this.decreaseQuantityButton = page.locator(
-      'button[data-test="decrease-quantity"]'
-    )
-    this.quantityLabel = page.locator('input[data-test="quantity"]')
     this.addToCartButton = page.getByRole("button", { name: /add to cart/i })
     this.addToFavouritesButton = page.locator("#btn-add-to-favorites")
-    this.toastRoot = page.getByRole("alert")
     this.cartButton = page.locator('a[data-test="nav-cart"]')
 
     // Initialize components
     this.quantity = new QuantitySetter(
-      this.quantityLabel,
-      this.increaseQuantityButton,
-      this.decreaseQuantityButton
+      this.page.locator(".input-group.quantity")
     )
-
-    this.toast = new Toast(this.toastRoot)
+    this.toast = new Toast(this.page.getByRole("alert"))
   }
 
   //   ==========
