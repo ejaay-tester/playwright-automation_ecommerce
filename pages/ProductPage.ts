@@ -1,33 +1,31 @@
-import { test, expect, Page, Locator } from "@playwright/test"
-import { TEST_CONFIG } from "../config/testConfig"
+import { Page, Locator, expect } from "@playwright/test"
 import { log } from "../utils/logger"
 import { getProductCardByName } from "../utils/helpers/elementHelper"
+import BasePage from "../pages/BasePage"
 import Toast from "../components/Toast"
 import QuantitySetter from "../components/QuantitySetter"
 
-export default class ProductPage {
-  private readonly page: Page
-
-  // Locators
+export default class ProductPage extends BasePage {
+  // Page Locators
   private readonly productCards: Locator
   private readonly addToCartButton: Locator
   private readonly addToFavouritesButton: Locator
   private readonly cartButton: Locator
 
-  // Components Reference
+  // Components
   readonly quantity: QuantitySetter
   readonly toast: Toast
 
   constructor(page: Page) {
-    this.page = page
+    super(page)
 
-    // Initialize locators
+    // Initialize Page Locators
     this.productCards = page.locator('a[data-test^="product-"]')
     this.addToCartButton = page.getByRole("button", { name: /add to cart/i })
     this.addToFavouritesButton = page.locator("#btn-add-to-favorites")
     this.cartButton = page.locator('a[data-test="nav-cart"]')
 
-    // Initialize components
+    // Initialize Components
     this.quantity = new QuantitySetter(
       this.page.locator(".input-group.quantity")
     )
@@ -39,30 +37,14 @@ export default class ProductPage {
   //   ==========
 
   //   Navigate to the landing page first, then select product to add in the cart
-  async navigateToProductListing() {
-    await test.step("Navigate to Product Listing Page", async () => {
-      //   Products page
-      await this.page.goto(TEST_CONFIG.baseURL, {
-        waitUntil: "domcontentloaded", // Loads faster, less prone to hang
-        timeout: TEST_CONFIG.timeouts.long,
-      })
 
-      //   Ensure at least one product card is visible
-      await expect(this.productCards.first()).toBeVisible({
-        timeout: TEST_CONFIG.timeouts.medium,
-      })
-      log("Product listing page loaded successfully")
-    })
+  async navigateToProductListingPage() {
+    await this.visit("/")
+    await expect(this.productCards.first()).toBeVisible() //  Ensure at least one product card is visible
   }
 
-  async navigateToCartItems() {
-    await test.step("Navigate to Cart Items Page", async () => {
-      //   Cart items page
-      await this.page.goto(`${TEST_CONFIG.baseURL}/checkout`, {
-        waitUntil: "domcontentloaded",
-        timeout: TEST_CONFIG.timeouts.long,
-      })
-    })
+  async navigateToCartItemsPage() {
+    await this.visit("/checkout")
   }
 
   //   ==========
@@ -71,58 +53,29 @@ export default class ProductPage {
 
   //   Select specific product from the product listing page
   async selectProductByName(productName: string) {
-    await test.step(`Select product "${productName}" from product listing`, async () => {
-      const productCard = getProductCardByName(this.page, productName)
+    const product = getProductCardByName(this.page, productName)
+    const totalMatchedProduct = await product.count()
 
-      //   For debugging purposes only...
-      const totalMatchedProduct = await productCard.count()
-      log(`Found ${totalMatchedProduct} product(s) matching "${productName}"`)
+    // For debugging purposes only...
+    log(`Found ${totalMatchedProduct} products(s) matching ${productName}`)
 
-      if (totalMatchedProduct === 0)
-        throw new Error(`No product found with name: "${productName}"`)
+    if (totalMatchedProduct === 0)
+      throw new Error(`Product not found: ${productName}`)
 
-      if (totalMatchedProduct > 1)
-        log(`Multiple matches for "${productName}". Using first match`)
+    await product.first().click()
 
-      const targetProductCard = productCard.first()
-      await targetProductCard.scrollIntoViewIfNeeded()
-      await expect(targetProductCard).toBeVisible({
-        timeout: TEST_CONFIG.timeouts.medium,
-      })
-      await targetProductCard.click()
-
-      //   Wait for product details page to load
-      await this.page.waitForLoadState("domcontentloaded")
-      await expect(this.addToCartButton).toBeVisible({
-        timeout: TEST_CONFIG.timeouts.medium,
-      })
-
-      log(`Successfully navigated to product detail page for "${productName}"`)
-    })
+    //  Wait until product detail page loads enough to interact with "Add to Cart"
+    await expect(this.addToCartButton).toBeVisible()
   }
 
   //   Add the selected product to the cart
   async addProductToCart() {
-    await test.step("Add the selected product to the cart", async () => {
-      await this.addToCartButton.scrollIntoViewIfNeeded()
-      await expect(this.addToCartButton).toBeVisible({
-        timeout: TEST_CONFIG.timeouts.short,
-      })
-      await this.addToCartButton.click()
-      log("Clicked on 'Add to Cart' button.")
-    })
+    await this.addToCartButton.click()
   }
 
   //   Add the selected product to the favourites
   async addProductToFavorites() {
-    await test.step("Add the selected product to favourites", async () => {
-      await this.addToFavouritesButton.scrollIntoViewIfNeeded()
-      await expect(this.addToFavouritesButton).toBeVisible({
-        timeout: TEST_CONFIG.timeouts.short,
-      })
-      await this.addToFavouritesButton.click()
-      log("Clicked on 'Add to Favourites' button.")
-    })
+    await this.addToFavouritesButton.click()
   }
 
   //   ==========

@@ -1,5 +1,6 @@
 import { EyesFixture } from "@applitools/eyes-playwright/fixture"
 import { defineConfig, devices } from "@playwright/test"
+import { TEST_CONFIG } from "config/testConfig"
 import dotenv from "dotenv"
 
 // Loads .env file variables into process.env
@@ -33,6 +34,9 @@ export default defineConfig<EyesFixture>({
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
+    baseURL: TEST_CONFIG.baseURL,
+    trace: "on-first-retry",
+
     /* Configuration for Eyes VisualAI */
     eyesConfig: {
       /* The following and other configuration parameters are documented at: https://applitools.com/tutorials/playwright/api/overview */
@@ -54,7 +58,6 @@ export default defineConfig<EyesFixture>({
     // baseURL: 'http://localhost:3000',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: "on-first-retry",
   },
 
   /* Configure projects for major browsers */
